@@ -1,8 +1,8 @@
-const ocr = require("./ocr");
-const { createPDF } = require("./pdf");
-const { translate } = require("./translate");
+import ocr from "./ocr";
+import { createPDF } from "./pdf";
+import { translate } from "./translate";
 
-(async () => {
+export const process = async () => {
     try {
         const text = await ocr.image2text("./data/sample.png");
         console.log(text);
@@ -13,4 +13,4 @@ const { translate } = require("./translate");
     } catch (e) {
         console.log(e);
     }
-})();
+};

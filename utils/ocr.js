@@ -1,12 +1,12 @@
-const tesseract = require("node-tesseract-ocr")
+import { recognize } from "node-tesseract-ocr"
 
 async function image2text(path){
-  return await tesseract.recognize(path, {
+  return await recognize(path, {
     lang: "eng"
   })
 }
 
-module.exports = {
+export {
   image2text
 }
 

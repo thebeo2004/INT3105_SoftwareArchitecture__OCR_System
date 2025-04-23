@@ -1,11 +1,10 @@
-const translator = require("open-google-translator");
+import { supportedLanguages, TranslateLanguageData } from "open-google-translator";
 
-translator.supportedLanguages();
+supportedLanguages();
 
 function translate(text) {
     return new Promise((resolve, reject) => {
-        translator
-            .TranslateLanguageData({
+        TranslateLanguageData({
                 listOfWordsToTranslate: [text],
                 fromLanguage: "en",
                 toLanguage: "vi",
@@ -18,6 +17,6 @@ function translate(text) {
     });
 }
 
-module.exports = {
+export {
     translate
 }

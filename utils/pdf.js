@@ -1,11 +1,11 @@
-const PDFDocument = require('pdfkit');
-const fs = require('fs');
+import PDFDocument from 'pdfkit';
+import { createWriteStream } from 'fs';
 
 const OUT_FILE = "./output/output.pdf";
 
 function createPDF(text) {
     const doc = new PDFDocument();
-    doc.pipe(fs.createWriteStream(OUT_FILE));
+    doc.pipe(createWriteStream(OUT_FILE));
     doc.font('font/Roboto-Regular.ttf')
         .fontSize(14)
         .text(text, 100, 100);
@@ -13,6 +13,6 @@ function createPDF(text) {
     return OUT_FILE;
 }
 
-module.exports = {
+export {
     createPDF
 }
