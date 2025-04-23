@@ -20,12 +20,37 @@ app.get('/process', async (req, res) => {
     }
 })
 
-app.post('/upload', (req, res) => {
-    if (!req.files) {
-        return res.status(400).json({message: "No file was uploaded"})
+app.post('/upload', async (req, res) => {
+    try {
+
+        if (!req.files) {
+            return res.status(400).json({message: "No file was uploaded"})
+        }
+        
+        console.log(`Received ${req.files.length} files.`)
+
+        let data = [];
+
+        for (const file of req.files) {
+            data.push({
+                originalName: file.originalName,
+                savedName: file.filename,
+                path: file.path,
+                size: file.size
+            })
+
+            // Perform asynchronous operations fer file
+            // await some AsyncFunction(file)
+        }
+
+        res.status(200).json({
+            message: `Successfully uploaded and processed ${req.files.length} files.`,
+            uploadedFilesData: data
+        })
+
+    } catch (err) {
+        res.status(500).send(err.message);
     }
-    console.log(req.files);
-    res.send('Successfully uploading files');
 })
 
 app.listen(PORT, () => {
