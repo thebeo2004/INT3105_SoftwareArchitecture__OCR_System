@@ -1,9 +1,12 @@
 import PDFDocument from 'pdfkit';
 import { createWriteStream } from 'fs';
 
-const OUT_FILE = "./output/output.pdf";
+// const OUT_FILE = `./output/${Date.now()}_output.pdf`
 
 function createPDF(text) {
+
+    let OUT_FILE = `./output/${Date.now()}.pdf`
+
     const doc = new PDFDocument();
     doc.pipe(createWriteStream(OUT_FILE));
     doc.font('font/Roboto-Regular.ttf')

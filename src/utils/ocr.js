@@ -1,7 +1,7 @@
 import { recognize } from "node-tesseract-ocr"
 
-async function image2text(path){
-  return await recognize(path, {
+async function image2text(buffer){
+  return await recognize(buffer, {
     lang: "eng"
   })
 }
