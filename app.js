@@ -6,7 +6,7 @@ const app = express();
 
 // Define middleware to handle form submitting
 app.use(express.urlencoded({extended:true}));
-app.use(upload.single('file'));
+app.use(upload.array("files"));
 
 
 const PORT = 3000;
@@ -21,10 +21,10 @@ app.get('/process', async (req, res) => {
 })
 
 app.post('/upload', (req, res) => {
-    if (!req.file) {
+    if (!req.files) {
         return res.status(400).json({message: "No file was uploaded"})
     }
-    console.log(req.file);
+    console.log(req.files);
     res.send('Successfully uploading files');
 })
 
