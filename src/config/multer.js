@@ -1,4 +1,5 @@
 import multer from "multer";
+import { fileFilter } from "../middlewares/file_filter.js";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -11,7 +12,8 @@ const storage = multer.diskStorage({
 
 export const upload = multer({
     storage:storage,
+    fileFilter: fileFilter,
     limits: {
-        fileSize: 4096000
+        fileSize: 4 * 1024 * 1024
     }
 })

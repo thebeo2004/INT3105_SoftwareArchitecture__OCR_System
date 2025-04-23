@@ -21,6 +21,9 @@ app.get('/process', async (req, res) => {
 })
 
 app.post('/upload', (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({message: "No file was uploaded"})
+    }
     console.log(req.file);
     res.send('Successfully uploading files');
 })
