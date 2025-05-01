@@ -34,7 +34,7 @@ const metric_measurement = (req, res, next) => {
 }
 
 
-const PORT = 3000;
+const PORT = 5000;
 
 app.get('/metrics', async (req, res) => {
     try {
