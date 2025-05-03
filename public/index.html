@@ -46,26 +46,31 @@
   <script>
     const form = document.getElementById("uploadForm");
     const result = document.getElementById("result");
-
+  
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
-
+  
       try {
-        const response = await fetch("/upload", {
-          method: "POST",
-          body: formData
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          result.innerHTML = `<p style="color: green;">${data.message}</p>`;
-        } else {
-          result.innerHTML = `<p style="color: red;">${data.message}</p>`;
-        }
+          const response = await fetch("/upload", {
+              method: "POST",
+              body: formData,
+          });
+  
+          const data = await response.json();
+  
+          if (response.ok) {
+              result.innerHTML = `
+                  <p style="color: green;">${data.message}</p>
+                  <a href="/download/${data.fileName}" download>
+                      <button>Download Processed PDF</button>
+                  </a>
+              `;
+          } else {
+              result.innerHTML = `<p style="color: red;">${data.message}</p>`;
+          }
       } catch (err) {
-        result.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+          result.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
       }
     });
   </script>

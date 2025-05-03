@@ -1,5 +1,6 @@
 import express from "express";
 import client from "prom-client";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { upload } from "./src/config/multer.js";
@@ -60,26 +61,79 @@ app.get("/metrics", async (req, res) => {
   }
 });
 
-app.post("/upload", metric_measurement, async (req, res) => {
-  try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "No files were uploaded." });
-    }
+app.get("/download/:fileName", (req, res) => {
+    const fileName = req.params.fileName;
+    const filePath = path.join(__dirname, "output", fileName);
 
-    for (const file of req.files) {
-      console.log(`Processing file: ${file.originalname}`);
-      uploadedFileSizeHistogram.observe(file.size);
-      await process(file.buffer); // giả sử đây là xử lý OCR hoặc tương tự
-      filesProcessedTotal.inc();
+    if (fs.existsSync(filePath)) {
+        res.download(filePath); // Send the file for download
+    } else {
+        res.status(404).send("File not found.");
     }
-
-    res.status(200).json({ message: `Successfully processed ${req.files.length} file(s).` });
-  } catch (err) {
-    console.error("Processing error:", err.message);
-    res.status(500).json({ message: "Error processing file(s).", error: err.message });
-  }
 });
 
+// app.post("/upload", metric_measurement, async (req, res) => {
+//     try {
+//       if (!req.files || req.files.length === 0) {
+//         return res.status(400).json({ message: "No files were uploaded." });
+//       }
+  
+//       const processedFiles = [];
+//       for (const file of req.files) {
+//         console.log(`Processing file: ${file.originalname}`);
+//         uploadedFileSizeHistogram.observe(file.size);
+  
+//         // Simulate processing and save output as PDF
+//         const outputFileName = `${file.originalname.split(".")[0]}_processed.pdf`;
+//         const outputFilePath = path.join(__dirname, "output", outputFileName);
+  
+//         await process(file.buffer, outputFilePath); // Assume process saves the file
+//         filesProcessedTotal.inc();
+  
+//         processedFiles.push(outputFileName);
+//       }
+  
+//       res.status(200).json({
+//         message: `Successfully processed ${req.files.length} file(s).`,
+//         fileName: processedFiles[0], // Return the first processed file for simplicity
+//       });
+//     } catch (err) {
+//       console.error("Processing error:", err.message);
+//       res.status(500).json({ message: "Error processing file(s).", error: err.message });
+//     }
+// });
+
+app.post("/upload", metric_measurement, async (req, res) => {
+    try {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: "No files were uploaded." });
+        }
+
+        const outputDir = path.join(__dirname, "output");
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir); // Ensure the output directory exists
+        }
+
+        const processedFiles = [];
+        for (const file of req.files) {
+            console.log(`Processing file: ${file.originalname}`);
+            uploadedFileSizeHistogram.observe(file.size);
+
+            const pdfFileName = await process(file.buffer, outputDir); // Pass the output directory
+            filesProcessedTotal.inc();
+
+            processedFiles.push(pdfFileName);
+        }
+
+        res.status(200).json({
+            message: `Successfully processed ${req.files.length} file(s).`,
+            fileName: processedFiles[0], // Return the first processed file for simplicity
+        });
+    } catch (err) {
+        console.error("Processing error:", err.message);
+        res.status(500).json({ message: "Error processing file(s).", error: err.message });
+    }
+});
   
 // Start server
 app.listen(PORT, () => {
