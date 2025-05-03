@@ -14,9 +14,10 @@ form.addEventListener("submit", async (e) => {
         const data = await response.json();
 
         if (response.ok) {
+            const fileNames = data.fileNames; // Danh sách file trả về từ server
             result.innerHTML = `
-                <p style="color: green;">${data.message}</p>
-                <button id="downloadButton">Download Processed PDF</button>
+                <p style="color: green;">Successfully processed ${fileNames.length} file(s).</p>
+                <button id="downloadButton">Download All Files</button>
             `;
 
             // Add event listener to the download button
@@ -27,15 +28,21 @@ form.addEventListener("submit", async (e) => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ fileName: data.fileName }),
+                    body: JSON.stringify({ fileNames }),
                 });
-                console.log("Sending fileName to /upoutput:", data.fileName);
 
                 const upoutputData = await upoutputResponse.json();
 
                 if (upoutputResponse.ok) {
-                    // Redirect to the file path for download
-                    window.location.href = `/download/${data.fileName}`;
+                    // Tải về từng file
+                    upoutputData.filePaths.forEach((filePath) => {
+                        const link = document.createElement("a");
+                        link.href = `/download/${filePath.split("\\").pop()}`;
+                        link.download = filePath.split("\\").pop();
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
                 } else {
                     result.innerHTML = `<p style="color: red;">${upoutputData.message}</p>`;
                 }

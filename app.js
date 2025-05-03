@@ -63,40 +63,39 @@ app.get("/metrics", async (req, res) => {
 });
 
 app.post("/upoutput", (req, res) => {
-    const { fileName } = req.body;
+    const { fileNames } = req.body;
 
-    if (!fileName) {
-        return res.status(400).json({ message: "fileName is required." });
+    if (!fileNames || !Array.isArray(fileNames) || fileNames.length === 0) {
+        return res.status(400).json({ message: "fileNames is required and must be an array." });
     }
-    
-    console.log("File name to send:", fileName);
 
-    const filePath = path.join(__dirname, "output", fileName);
-    console.log("File name to send:", filePath);
-    
-    if (fs.existsSync(filePath)) {
-        res.status(200).json({ filePath });
-    } else {
-        res.status(404).json({ message: "File not found." });
+    const filePaths = fileNames.map((fileName) => {
+        const filePath = path.join(__dirname, "output", fileName);
+        if (fs.existsSync(filePath)) {
+            return filePath;
+        } else {
+            console.log("File not found:", filePath);
+            return null;
+        }
+    }).filter(Boolean);
+
+    if (filePaths.length === 0) {
+        return res.status(404).json({ message: "No files found." });
     }
+
+    res.status(200).json({ filePaths });
 });
-
+  
 app.get("/download/:fileName", (req, res) => {
-    const fileName = req.params.fileName; // Lấy tên file từ URL
-    const filePath = path.join(__dirname, "output", fileName); // Đường dẫn đầy đủ đến file
-
-    // Debugging: Print the variables
-    console.log("Requested fileName:", fileName);
-    console.log("Resolved filePath:", filePath);
+    const fileName = req.params.fileName;
+    const filePath = path.join(__dirname, "output", fileName);
 
     if (fs.existsSync(filePath)) {
-        res.download(filePath); // Gửi file về cho người dùng
+        res.download(filePath);
     } else {
-        res.status(404).send("File not found."); // Trả về lỗi nếu file không tồn tại
+        res.status(404).send("File not found.");
     }
 });
-
-
 
 app.post("/upload", metric_measurement, async (req, res) => {
     try {
@@ -114,7 +113,8 @@ app.post("/upload", metric_measurement, async (req, res) => {
             console.log(`Processing file: ${file.originalname}`);
             uploadedFileSizeHistogram.observe(file.size);
 
-            const pdfFileName = await process(file.buffer, outputDir); // Gọi hàm process
+            // Gọi hàm process để xử lý file và trả về tên file PDF
+            const pdfFileName = await process(file.buffer, outputDir); 
             filesProcessedTotal.inc();
 
             processedFiles.push(pdfFileName);
@@ -122,14 +122,15 @@ app.post("/upload", metric_measurement, async (req, res) => {
 
         res.status(200).json({
             message: `Successfully processed ${req.files.length} file(s).`,
-            fileName: processedFiles[0], // Trả về tên file đầu tiên
+            fileNames: processedFiles, // Trả về danh sách tất cả các file đã xử lý
         });
     } catch (err) {
         console.error("Processing error:", err.message);
         res.status(500).json({ message: "Error processing file(s).", error: err.message });
     }
 });
-  
+
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
