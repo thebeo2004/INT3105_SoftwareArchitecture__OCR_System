@@ -29,6 +29,63 @@ export const httpRequestsInProgress = new client.Gauge({
     labelNames: ['method', 'route'],
 });
 
+// --- Granular Processing Metrics ---
+
+// OCR Processing Duration
+export const ocrProcessingDurationSeconds = new client.Histogram({
+    name: 'ocr_processing_duration_seconds',
+    help: 'Duration of OCR processing step in seconds',
+    buckets: [0.1, 0.5, 1, 2, 5, 10, 30] // Adjust buckets as needed
+});
+
+// PDF Creation Duration
+export const pdfCreationDurationSeconds = new client.Histogram({
+    name: 'pdf_creation_duration_seconds',
+    help: 'Duration of PDF creation step in seconds',
+    buckets: [0.05, 0.1, 0.2, 0.5, 1, 2, 5] // Adjust buckets as needed
+});
+
+// Translation Duration (if applicable)
+export const translationDurationSeconds = new client.Histogram({
+    name: 'translation_duration_seconds',
+    help: 'Duration of translation step in seconds',
+    buckets: [0.1, 0.3, 0.5, 1, 2, 5, 10] // Adjust buckets as needed
+});
+
+// --- Granular Error Metrics ---
+
+export const ocrErrorsTotal = new client.Counter({
+    name: 'ocr_errors_total',
+    help: 'Total number of OCR processing errors',
+    labelNames: ['error_type'] // Optional: classify errors
+});
+
+export const pdfCreationErrorsTotal = new client.Counter({
+    name: 'pdf_creation_errors_total',
+    help: 'Total number of PDF creation errors',
+    labelNames: ['error_type'] // Optional: classify errors
+});
+
+export const translationErrorsTotal = new client.Counter({
+    name: 'translation_errors_total',
+    help: 'Total number of translation errors',
+    labelNames: ['error_type'] // Optional: classify errors
+});
+
+// --- Input Characteristics ---
+
+export const uploadedFileSizeHistogram = new client.Histogram({
+    name: 'uploaded_file_size_bytes',
+    help: 'Histogram of uploaded file sizes in bytes',
+    // Buckets in bytes (e.g., 10KB, 100KB, 1MB, 10MB, 100MB)
+    buckets: [10*1024, 100*1024, 1024*1024, 10*1024*1024, 100*1024*1024]
+});
+
+// Optional: OCR Pages Processed
+export const ocrPagesProcessedTotal = new client.Counter({
+    name: 'ocr_pages_processed_total',
+    help: 'Total number of pages processed by OCR'
+});
 
 // src/middlewares/measurement.js
 export function createMetricMeasurementMiddleware(httpRequestDurationMicroseconds) {

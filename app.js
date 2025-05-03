@@ -3,13 +3,20 @@ import client from 'prom-client';
 
 import {process} from "./src/utils/serve.js"
 import { upload } from "./src/config/multer.js";
-// Import new metrics along with the existing ones
 import { 
     createMetricMeasurementMiddleware, 
     httpRequestDurationMicroseconds, 
     httpRequestErrorsTotal, 
     filesProcessedTotal, 
-    httpRequestsInProgress 
+    httpRequestsInProgress,
+    ocrProcessingDurationSeconds,
+    pdfCreationDurationSeconds,
+    translationDurationSeconds,
+    ocrErrorsTotal,
+    pdfCreationErrorsTotal,
+    translationErrorsTotal,
+    uploadedFileSizeHistogram,
+    ocrPagesProcessedTotal
 } from "./src/middlewares/measurement.js";
 
 const app = express();
@@ -25,6 +32,14 @@ register.registerMetric(httpRequestDurationMicroseconds);
 register.registerMetric(httpRequestErrorsTotal);
 register.registerMetric(filesProcessedTotal);
 register.registerMetric(httpRequestsInProgress);
+register.registerMetric(ocrProcessingDurationSeconds);
+register.registerMetric(pdfCreationDurationSeconds);
+register.registerMetric(translationDurationSeconds);
+register.registerMetric(ocrErrorsTotal);
+register.registerMetric(pdfCreationErrorsTotal);
+register.registerMetric(translationErrorsTotal);
+register.registerMetric(uploadedFileSizeHistogram);
+register.registerMetric(ocrPagesProcessedTotal);
 
 
 // Define middleware to handle form submitting
@@ -54,9 +69,11 @@ app.post('/upload', metric_measurement, async (req, res) => {
         let data = [];
 
         for (const file of req.files) {
-            await process(file.buffer)
+            // Record file size
+            uploadedFileSizeHistogram.observe(file.size);
+
+            await process(file.buffer) // Pass the buffer to process
             // Increment the counter after successfully processing each file
-            // If you want to increment only once after all files are done, move this outside the loop
             filesProcessedTotal.inc(); 
         }
 
