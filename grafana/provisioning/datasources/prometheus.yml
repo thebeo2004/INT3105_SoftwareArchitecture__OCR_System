@@ -1,0 +1,10 @@
+# filepath: grafana/provisioning/datasources/prometheus.yml
+apiVersion: 1
+
+datasources:
+  - name: Prometheus # Tên hiển thị trong Grafana
+    type: prometheus
+    access: proxy # Nên dùng proxy để Grafana xử lý request
+    url: http://prometheus:9090 # URL của Prometheus (tên service trong docker-compose)
+    isDefault: true # Đặt làm datasource mặc định (tùy chọn)
+    editable: true # Cho phép chỉnh sửa trong UI (tùy chọn)

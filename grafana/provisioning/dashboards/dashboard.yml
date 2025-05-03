@@ -1,0 +1,12 @@
+# filepath: grafana/provisioning/dashboards/dashboard.yml
+apiVersion: 1
+
+providers:
+  - name: 'default' # Tên của provider
+    orgId: 1
+    folder: '' # Để trống để đặt trong thư mục General
+    type: file
+    disableDeletion: false # Cho phép xóa dashboard từ UI
+    editable: true # Cho phép chỉnh sửa dashboard từ UI
+    options:
+      path: /etc/grafana/provisioning/dashboards # Đường dẫn trong container nơi chứa file JSON dashboard
