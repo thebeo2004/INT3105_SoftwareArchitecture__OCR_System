@@ -123,6 +123,63 @@
         ],
         "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
         "fieldConfig": { "defaults": { "unit": "bytes" } }
+    },
+    {
+      "title": "Processing Step Durations (P95)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": null },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(ocr_processing_duration_seconds_bucket{job=\"ocr-system\"}[$__rate_interval])) by (le))",
+          "legendFormat": "OCR P95"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(pdf_creation_duration_seconds_bucket{job=\"ocr-system\"}[$__rate_interval])) by (le))",
+          "legendFormat": "PDF P95"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(translation_duration_seconds_bucket{job=\"ocr-system\"}[$__rate_interval])) by (le))",
+          "legendFormat": "Translate P95"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "title": "Processing Error Rate",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": null },
+      "targets": [
+        {
+          "expr": "sum(rate(ocr_errors_total{job=\"ocr-system\"}[$__rate_interval])) by (error_type)",
+          "legendFormat": "OCR Err: {{error_type}}"
+        },
+        {
+          "expr": "sum(rate(pdf_creation_errors_total{job=\"ocr-system\"}[$__rate_interval])) by (error_type)",
+          "legendFormat": "PDF Err: {{error_type}}"
+        },
+        {
+          "expr": "sum(rate(translation_errors_total{job=\"ocr-system\"}[$__rate_interval])) by (error_type)",
+          "legendFormat": "Translate Err: {{error_type}}"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "fieldConfig": { "defaults": { "unit": "errps" } }
+    },
+    {
+      "title": "Uploaded File Size (P95)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": null },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(uploaded_file_size_bytes_bucket{job=\"ocr-system\"}[$__rate_interval])) by (le))",
+          "legendFormat": "File Size P95"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "fieldConfig": { "defaults": { "unit": "bytes" } }
     }
   ],
   "refresh": "",
