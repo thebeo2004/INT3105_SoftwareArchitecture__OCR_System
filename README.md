@@ -10,7 +10,10 @@ $ npm install
 # Tạo folder cho output
 $ mkdir output
 # Khởi chạy ứng dụng demo
-$ npm start
+$ npm start dev
+
+docker-compose up
+
 ```
 
 ## Mô Tả

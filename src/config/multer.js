@@ -1,18 +1,13 @@
-import multer from "multer";
-import { fileFilter } from "../middlewares/file_filter.js";
+// src/config/multer.js
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/')
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.originalname)
-    }
-})
+import multer from "multer";
+
+// Lưu file trong bộ nhớ (buffer), không lưu vào disk
+const storage = multer.memoryStorage();
 
 export const upload = multer({
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: 4 * 1024 * 1024
-    }
-})
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // Giới hạn 5MB mỗi file
+  }
+});

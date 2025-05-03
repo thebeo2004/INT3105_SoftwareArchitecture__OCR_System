@@ -1,0 +1,73 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OCR Uploader</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 50px;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input[type="file"] {
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    #result {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Upload Image for OCR</h1>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="files" multiple accept="image/*" required />
+    <br />
+    <button type="submit">Upload and Process</button>
+  </form>
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch("/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          result.innerHTML = `<p style="color: green;">${data.message}</p>`;
+        } else {
+          result.innerHTML = `<p style="color: red;">${data.message}</p>`;
+        }
+      } catch (err) {
+        result.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>

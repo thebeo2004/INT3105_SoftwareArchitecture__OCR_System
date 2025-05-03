@@ -49,20 +49,20 @@ function getContentType(filename) {
 export const options = {
 
     // // Kịch bản 1: Kiểm thử Cơ bản (Baseline Test)
-    // scenarios: {
-    //   baseline: {
-    //     executor: 'constant-arrival-rate', 
-    //     // 1 request per second
-    //     rate: 1, 
-    //     timeUnit: '1s',
-    //     // Duration of scenario
-    //     duration: '5m', 
-    //     // There are always 5 VUs and this number might reach 10
-    //     preAllocatedVUs: 5, 
-    //     maxVUs: 10, 
-    //     exec: 'uploadFile', 
-    //   },
-    // },
+    scenarios: {
+      baseline: {
+        executor: 'constant-arrival-rate', 
+        // 1 request per second
+        rate: 1, 
+        timeUnit: '1s',
+        // Duration of scenario
+        duration: '5m', 
+        // There are always 5 VUs and this number might reach 10
+        preAllocatedVUs: 5, 
+        maxVUs: 10, 
+        exec: 'uploadFile', 
+      },
+    },
 
     // // Kịch bản 2: Kiểm thử Tải Tăng dần (Ramp-up Load Test)
     // scenarios: {
