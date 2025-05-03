@@ -47,7 +47,7 @@ export const process = async (buffer, outputDir) => {
     // --- PDF Creation Step ---
     const pdfEnd = pdfCreationDurationSeconds.startTimer();
     try {
-        pdfFileName = `processed_${Date.now()}.pdf`; // Tạo tên file duy nhất
+        pdfFileName = `${Date.now()}.pdf`; // Tạo tên file duy nhất
         const pdfFilePath = path.join(outputDir, pdfFileName); // Đường dẫn đầy đủ
         createPDF(viText, pdfFilePath); // Lưu file PDF vào thư mục output
         pdfEnd();

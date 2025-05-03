@@ -12,7 +12,17 @@ $ mkdir output
 # Khởi chạy ứng dụng demo
 $ npm start dev
 
+# chạy app:
+
+node app.js
+
+# Sửa file index.html và css thoi ne
+
+# Đoạn sau này nếu chạy đc app rồi thì m cứ bỏ qua
 docker-compose up
+
+# Cài K6:
+https://grafana.com/docs/k6/latest/set-up/install-k6/?fbclid=IwY2xjawKDMldleHRuA2FlbQIxMABicmlkETFaaTNpdkFJQU1ReXhBQldVAR65x74uOtCq9OmX8aV96o0eGWpyEAgahpQUBVQAuZRKyHvGCkDZ4Zt8IXOY5w_aem_IWtd7iphtC2SzVI8GZkogg
 
 ```
 
