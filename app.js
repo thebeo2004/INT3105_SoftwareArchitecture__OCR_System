@@ -3,7 +3,14 @@ import client from 'prom-client';
 
 import {process} from "./src/utils/serve.js"
 import { upload } from "./src/config/multer.js";
-import { createMetricMeasurementMiddleware, httpRequestDurationMicroseconds } from "./src/middlewares/measurement.js";
+// Import new metrics along with the existing ones
+import { 
+    createMetricMeasurementMiddleware, 
+    httpRequestDurationMicroseconds, 
+    httpRequestErrorsTotal, 
+    filesProcessedTotal, 
+    httpRequestsInProgress 
+} from "./src/middlewares/measurement.js";
 
 const app = express();
 
@@ -12,7 +19,13 @@ const collectDefaultMetrics = client.collectDefaultMetrics;
 const Registry = client.Registry;
 const register = new Registry();
 collectDefaultMetrics({ register }); // Collect default Node.js metrics
+
+// Register all metrics
 register.registerMetric(httpRequestDurationMicroseconds);
+register.registerMetric(httpRequestErrorsTotal);
+register.registerMetric(filesProcessedTotal);
+register.registerMetric(httpRequestsInProgress);
+
 
 // Define middleware to handle form submitting
 app.use(express.urlencoded({extended:true}));
@@ -42,6 +55,9 @@ app.post('/upload', metric_measurement, async (req, res) => {
 
         for (const file of req.files) {
             await process(file.buffer)
+            // Increment the counter after successfully processing each file
+            // If you want to increment only once after all files are done, move this outside the loop
+            filesProcessedTotal.inc(); 
         }
 
         res.status(200).json({
@@ -49,6 +65,7 @@ app.post('/upload', metric_measurement, async (req, res) => {
         })
 
     } catch (err) {
+        // Error handling remains the same, error counter is incremented in middleware
         res.status(500).send(err.message);
     }
 })
