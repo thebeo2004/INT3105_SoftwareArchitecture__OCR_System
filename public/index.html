@@ -2,17 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OCR Uploader</title>
+  <title>English Image Translator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Upload Image for OCR</h1>
-  <form id="uploadForm" enctype="multipart/form-data">
-    <input type="file" name="files" multiple accept="image/*" required />
-    <br />
-    <button type="submit">Upload and Process</button>
-  </form>
-  <div id="result"></div>
+  <div class="container">
+    <header>
+      <h1>Translate English from Image</h1>
+      <p>Select one or more images with English text. The system will recognize and convert them into a translated PDF.</p>
+    </header>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="files" multiple accept="image/*" required />
+      <button type="submit">Upload and Translate</button>
+    </form>
+
+    <div id="result"></div>
+  </div>
 
   <script src="script.js"></script>
 </body>

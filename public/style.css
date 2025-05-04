@@ -1,27 +1,239 @@
+/* Reset and base styling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  font-family: Arial, sans-serif;
-  padding: 50px;
-  background: #f9f9f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #e9f0fb;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 123, 255, 0.1);
+}
+
+header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+header h1 {
+  font-size: 24px;
+  color: #007BFF;
+  margin-bottom: 10px;
+}
+
+header p {
+  font-size: 14px;
+  color: #555;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+input[type="file"] {
+  padding: 10px;
+  border: 2px dashed #007BFF;
+  border-radius: 8px;
+  background: #f0f8ff;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+button {
+  padding: 12px;
+  font-size: 16px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056cc;
+}
+
+#result {
+  margin-top: 20px;
+  text-align: center;
+}
+
+#result p {
+  font-size: 16px;
+}
+
+#downloadButton {
+  margin-top: 10px;
+  background-color: #28a745;
+}
+
+#downloadButton:hover {
+  background-color: #218838;
+}
+
+/* Loading Spinner */
+#loading {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 20px;
+  color: #007BFF;
+  font-weight: 500;
 }
-form {
+
+.spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #007BFF;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.hidden {
+  display: none;
+}/* Reset and base styling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #e9f0fb;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
   background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 123, 255, 0.1);
 }
+
+header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+header h1 {
+  font-size: 24px;
+  color: #007BFF;
+  margin-bottom: 10px;
+}
+
+header p {
+  font-size: 14px;
+  color: #555;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
 input[type="file"] {
-  margin-bottom: 15px;
+  padding: 10px;
+  border: 2px dashed #007BFF;
+  border-radius: 8px;
+  background: #f0f8ff;
+  margin-bottom: 20px;
+  cursor: pointer;
 }
+
 button {
-  padding: 10px 20px;
-  background: #007BFF;
+  padding: 12px;
+  font-size: 16px;
+  background-color: #007BFF;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
+
+button:hover {
+  background-color: #0056cc;
+}
+
 #result {
   margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px; /* Khoảng cách đều giữa các khối */
+}
+
+
+#result p {
+  font-size: 16px;
+}
+
+#downloadButton {
+  margin-top: 10px;
+  background-color: #28a745;
+}
+
+#downloadButton:hover {
+  background-color: #218838;
+}
+
+/* Loading Spinner */
+#loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  color: #007BFF;
+  font-weight: 500;
+}
+
+.spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #007BFF;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.hidden {
+  display: none;
 }
