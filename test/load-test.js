@@ -140,7 +140,7 @@ export function uploadFile () {
     requestDuration.add(res.timings.duration);
 
     check(res, {
-        [`[${randomFile.name}] status is 200`]: (r) => r.status === 200,
+        [`[${randomFile.name}] status is 202`]: (r) => r.status === 202,
     });
 
     sleep(1);
