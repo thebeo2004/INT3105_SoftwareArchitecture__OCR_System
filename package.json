@@ -13,6 +13,7 @@
   "type": "module",
   "dependencies": {
     "express": "^5.1.0",
+    "kafkajs": "^2.2.4",
     "multer": "^1.4.5-lts.2",
     "node-tesseract-ocr": "^2.2.1",
     "open-google-translator": "^1.0.5",
