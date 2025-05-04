@@ -7,16 +7,8 @@ import { upload } from "./src/config/multer.js";
 import { 
     httpRequestDurationMicroseconds, 
     httpRequestErrorsTotal, 
-    // filesProcessedTotal, 
-    httpRequestsInProgress,
-    // ocrProcessingDurationSeconds,
-    // pdfCreationDurationSeconds,
-    // translationDurationSeconds,
-    // ocrErrorsTotal,
-    // pdfCreationErrorsTotal,
-    // translationErrorsTotal,
-    uploadedFileSizeHistogram,
-    // ocrPagesProcessedTotal
+    httpRequestsInProgress,  
+    uploadedFileSizeHistogram,    
 } from "./src/middlewares/measurement.js";
 
 const app = express();
@@ -28,7 +20,7 @@ const Registry = client.Registry;
 const register = new Registry();
 collectDefaultMetrics({ register }); // Collect default Node.js metrics
 
-// Register all metrics
+// Register only metrics relevant to the web server process
 register.registerMetric(httpRequestDurationMicroseconds);
 register.registerMetric(httpRequestErrorsTotal);
 register.registerMetric(httpRequestsInProgress);

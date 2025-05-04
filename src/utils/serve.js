@@ -1,6 +1,7 @@
 import { image2text } from "./ocr.js";
 import { createPDF } from "./pdf.js";
 import { translate } from "./translate.js";
+import fs from 'fs/promises';
 
 // Import the necessary metrics
 import {
@@ -10,11 +11,18 @@ import {
     ocrErrorsTotal,
     pdfCreationErrorsTotal,
     translationErrorsTotal,
-    // ocrPagesProcessedTotal // Import if you can get page count from OCR result
 } from "../middlewares/measurement.js";
 
-export const process = async (buffer) => {
+export const process = async (filePath) => {
     let text, viText, pdfFile;
+    let buffer;
+
+    try {
+        buffer = await fs.readFile(filePath); 
+    } catch (readError) {
+        console.error(`Error reading file ${filePath}:`, readError);
+        throw new Error(`Failed to read file: ${readError.message}`);
+    }
 
     // --- OCR Step ---
     const ocrEnd = ocrProcessingDurationSeconds.startTimer();
@@ -22,9 +30,6 @@ export const process = async (buffer) => {
         text = await image2text(buffer);
         ocrEnd(); // End timer on success
         console.log(text);
-        // Optional: Increment page count if available
-        // const pageCount = ... // Get page count from OCR result if possible
-        // if (pageCount) ocrPagesProcessedTotal.inc(pageCount);
     } catch (e) {
         ocrEnd(); // Still end timer on error
         ocrErrorsTotal.inc({ error_type: e.constructor.name }); // Increment error counter
@@ -52,9 +57,10 @@ export const process = async (buffer) => {
     // --- PDF Creation Step ---
     const pdfEnd = pdfCreationDurationSeconds.startTimer();
     try {
-        pdfFile = createPDF(viText); // Use translated text
+        pdfFile = await createPDF(viText); // Use translated text and await the promise
         pdfEnd();
         console.log("PDF created: " + pdfFile);
+        return pdfFile; // Return the PDF file path on success
     } catch (e) {
         pdfEnd();
         pdfCreationErrorsTotal.inc({ error_type: e.constructor.name });
@@ -63,5 +69,6 @@ export const process = async (buffer) => {
     }
 
     // If all steps succeed, the overall process for this file is successful
-    // (filesProcessedTotal is incremented in app.js after this function returns successfully)
+    // (filesProcessedTotal is incremented in the worker after this function returns successfully)
+    // Remove the implicit undefined return
 };

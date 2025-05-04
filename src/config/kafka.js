@@ -1,7 +1,7 @@
 import { Kafka } from "kafkajs";
 
-const RECEIVED_TOPIC = 'received_files';
-const OUTPUT_TOPIC = 'ocr-results-topic';
+export const RECEIVED_TOPIC = 'received_files';
+export const OUTPUT_TOPIC = 'ocr-results-topic';
 
 export const kafka = new Kafka({
     clientId: 'upload-app-producer',
