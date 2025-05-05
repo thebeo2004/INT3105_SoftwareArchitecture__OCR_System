@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
 import { createWriteStream } from 'fs';
-import { OUTPUT_DIR } from '../controller/worker';
+import { OUTPUT_DIR } from '../controller/worker.js';
 import path from 'path';
 
 function createPDF(text) {

@@ -15,8 +15,8 @@ import { filesProcessedTotal,
 
 const WORKER_METRICS_PORT = 5001; // Define a port for worker metrics
 
-const UPLOADS_DIR = '/app/uploads';
-export const OUTPUT_DIR = '/app/output';
+const UPLOADS_DIR = process.env.UPLOADS_DIR || '/app/uploads';
+export const OUTPUT_DIR = process.env.OUTPUT_DIR || '/app/output';
 
 const workerApp = express();
 const workerRegister = new client.Registry();
@@ -54,7 +54,7 @@ const run = async () => {
 
         workerServer = workerApp.listen(WORKER_METRICS_PORT, () => {
             console.log(`Worker metrics server listening on port ${WORKER_METRICS_PORT}`);
-            console.log(`Worker metrics available at http://localhost:${WORKER_METRICS_PORT}/metrics`);
+            console.log(`Worker metrics available at http://worker:${WORKER_METRICS_PORT}/metrics`);
         });
 
         workerServer.on('error', (err) => {

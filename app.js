@@ -1,8 +1,9 @@
 import express from "express";
 import client from 'prom-client';
+import { Kafka } from "kafkajs";
 
 // import {process} from "./src/utils/serve.js"
-import { kafka, sending_msg } from "./src/config/kafka.js"
+import { sending_msg } from "./src/config/kafka.js"
 import { upload } from "./src/config/multer.js";
 import { 
     httpRequestDurationMicroseconds, 
@@ -12,6 +13,10 @@ import {
 } from "./src/middlewares/measurement.js";
 
 const app = express();
+const kafka = new Kafka({
+    clientId: 'upload-app-producer',
+    brokers: ['localhost:9092']
+});
 const producer = kafka.producer();
 
 // -- Prometheus Metrics Setup ---

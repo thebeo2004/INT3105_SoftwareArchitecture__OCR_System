@@ -2,6 +2,23 @@ version: '3'
 
 services:
 
+  worker:
+    build: .
+    container_name: ocr-worker
+    restart: always
+    depends_on:
+      broker:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads:ro
+      - ./output:/app/output 
+    ports:
+      - "5001:5001"
+    environment:
+      - KAFKA_BROKERS=broker:29092
+      - UPLOADS_DIR=/app/uploads
+      - OUTPUT_DIR=/app/output
+
   zookeeper:
       image: confluentinc/cp-zookeeper
       hostname: zookeeper
