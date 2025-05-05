@@ -1,19 +1,21 @@
 import PDFDocument from 'pdfkit';
 import { createWriteStream } from 'fs';
-
-// const OUT_FILE = `./output/${Date.now()}_output.pdf`
+import { OUTPUT_DIR } from '../controller/worker';
+import path from 'path';
 
 function createPDF(text) {
 
-    let OUT_FILE = `./output/${Date.now()}.pdf`
+    const filename = `${Date.now()}.pdf`
+    const fullOutputPath = path.join(OUTPUT_DIR, filename)
 
     const doc = new PDFDocument();
-    doc.pipe(createWriteStream(OUT_FILE));
+    doc.pipe(createWriteStream(fullOutputPath));
     doc.font('font/Roboto-Regular.ttf')
         .fontSize(14)
         .text(text, 100, 100);
     doc.end();
-    return OUT_FILE;
+    
+    return fullOutputPath;
 }
 
 export {

@@ -5,7 +5,7 @@ export const OUTPUT_TOPIC = 'ocr-results-topic';
 
 export const kafka = new Kafka({
     clientId: 'upload-app-producer',
-    brokers: ['localhost:9092']
+    brokers: ['kafka:9092']
 });
 
 export const sending_msg =  async (msgPayload, producer) => {
