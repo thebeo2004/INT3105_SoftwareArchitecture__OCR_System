@@ -75,9 +75,9 @@ app.post('/upload', async (req, res) => {
         const processedFiles = [];
         const errors = [];
 
-        // Sử dụng for...of để lặp qua các đối tượng file trong mảng req.files
         for (const file of req.files) {
-            const filePath = file.path; // Lấy đường dẫn chính xác từ đối tượng file
+            uploadedFileSizeHistogram.observe(file.size);
+            const filePath = file.path;
 
             try {
                 const messagePayload = {
@@ -90,20 +90,16 @@ app.post('/upload', async (req, res) => {
             } catch (error) {
                 console.error(`Error processing file ${filePath} or sending to Kafka:`, error);
                 errors.push({ filePath: filePath, error: error.message });
-                // Không gửi phản hồi lỗi ở đây
             }
         }
 
-        // Gửi phản hồi MỘT LẦN sau khi xử lý tất cả các tệp
         if (errors.length > 0) {
-            // Nếu có lỗi, gửi phản hồi lỗi tổng hợp
             res.status(500).json({
                 message: 'Some files could not be processed.',
                 processed: processedFiles,
                 failed: errors
             });
         } else {
-            // Nếu không có lỗi, gửi phản hồi thành công
             res.status(202).json({
                 message: `${processedFiles.length} file(s) received and queued for processing.`,
                 filePaths: processedFiles
@@ -111,7 +107,6 @@ app.post('/upload', async (req, res) => {
         }
 
     } catch (err) {
-        // Lỗi chung (ví dụ: lỗi từ middleware Multer trước khi vào handler)
         console.error('Error in /upload handler:', err);
         res.status(500).send(err.message || 'An unexpected error occurred during upload.');
     }
@@ -134,7 +129,7 @@ const run = async() => {
             try {
                 console.log(`process.on ${type}`);
                 console.error(e);
-                await producer.disconnect(); // Ngắt kết nối producer
+                await producer.disconnect();
                 process.exit(0);
             } catch (_) {
                 process.exit(1);
@@ -146,7 +141,7 @@ const run = async() => {
         process.once(type, async () => {
             try {
                 console.log(`Signal ${type} received. Shutting down gracefully.`);
-                await producer.disconnect(); // Ngắt kết nối producer
+                await producer.disconnect(); 
             } finally {
                 process.kill(process.pid, type);
             }

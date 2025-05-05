@@ -3,7 +3,15 @@ import path from 'path';
 import express from 'express';
 import client from "prom-client";
 import { process as processFile } from "../utils/serve.js";
-import { filesProcessedTotal, ocrPagesProcessedTotal } from "../middlewares/measurement.js";
+import { filesProcessedTotal, 
+        ocrPagesProcessedTotal,
+        ocrProcessingDurationSeconds,
+        pdfCreationDurationSeconds,
+        translationDurationSeconds,
+        ocrErrorsTotal,         
+        pdfCreationErrorsTotal, 
+        translationErrorsTotal, 
+ } from "../middlewares/measurement.js";
 
 const WORKER_METRICS_PORT = 5001; // Define a port for worker metrics
 
@@ -15,6 +23,12 @@ client.collectDefaultMetrics({ register: workerRegister, prefix: 'worker_' });
 // Register the metrics
 workerRegister.registerMetric(filesProcessedTotal);
 workerRegister.registerMetric(ocrPagesProcessedTotal);
+workerRegister.registerMetric(ocrProcessingDurationSeconds);
+workerRegister.registerMetric(pdfCreationDurationSeconds);
+workerRegister.registerMetric(translationDurationSeconds);
+workerRegister.registerMetric(ocrErrorsTotal);
+workerRegister.registerMetric(pdfCreationErrorsTotal);
+workerRegister.registerMetric(translationErrorsTotal);
 
 workerApp.get('/metrics', async (req, res) => {
     try {

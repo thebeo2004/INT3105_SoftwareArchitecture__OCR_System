@@ -77,7 +77,7 @@
         "datasource": { "type": "prometheus", "uid": null },
         "targets": [
             {
-                "expr": "rate(files_processed_total{job=\"ocr-system\"}[$__rate_interval])",
+                "expr": "rate(files_processed_total[$__rate_interval])",
                 "legendFormat": "Files Processed / sec"
             }
         ],
@@ -130,15 +130,15 @@
       "datasource": { "type": "prometheus", "uid": null },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(ocr_processing_duration_seconds_bucket{job=\"ocr-system\"}[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(ocr_processing_duration_seconds_bucket[$__rate_interval])) by (le))",
           "legendFormat": "OCR P95"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(pdf_creation_duration_seconds_bucket{job=\"ocr-system\"}[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(pdf_creation_duration_seconds_bucket[$__rate_interval])) by (le))",
           "legendFormat": "PDF P95"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(translation_duration_seconds_bucket{job=\"ocr-system\"}[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(translation_duration_seconds_bucket[$__rate_interval])) by (le))",
           "legendFormat": "Translate P95"
         }
       ],
@@ -152,15 +152,15 @@
       "datasource": { "type": "prometheus", "uid": null },
       "targets": [
         {
-          "expr": "sum(rate(ocr_errors_total{job=\"ocr-system\"}[$__rate_interval])) by (error_type)",
+          "expr": "sum(rate(ocr_errors_total[$__rate_interval])) by (error_type)",
           "legendFormat": "OCR Err: {{error_type}}"
         },
         {
-          "expr": "sum(rate(pdf_creation_errors_total{job=\"ocr-system\"}[$__rate_interval])) by (error_type)",
+          "expr": "sum(rate(pdf_creation_errors_total[$__rate_interval])) by (error_type)",
           "legendFormat": "PDF Err: {{error_type}}"
         },
         {
-          "expr": "sum(rate(translation_errors_total{job=\"ocr-system\"}[$__rate_interval])) by (error_type)",
+          "expr": "sum(rate(translation_errors_total[$__rate_interval])) by (error_type)",
           "legendFormat": "Translate Err: {{error_type}}"
         }
       ],
@@ -174,7 +174,7 @@
       "datasource": { "type": "prometheus", "uid": null },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(uploaded_file_size_bytes_bucket{job=\"ocr-system\"}[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(uploaded_file_size_bytes_bucket[$__rate_interval])) by (le))",
           "legendFormat": "File Size P95"
         }
       ],
