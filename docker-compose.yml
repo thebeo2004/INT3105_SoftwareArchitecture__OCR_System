@@ -4,21 +4,19 @@ services:
 
   worker:
     build: .
-    container_name: ocr-worker
     restart: always
     depends_on:
       broker:
         condition: service_healthy
     volumes:
       - ./uploads:/app/uploads:ro
-      - ./output:/app/output 
-    ports:
-      - "5001:5001"
+      - ./output:/app/output
     environment:
       - KAFKA_BROKERS=broker:29092
       - UPLOADS_DIR=/app/uploads
       - OUTPUT_DIR=/app/output
       - REDIS_URL=redis://redis:6379
+      - METRICS_PORT=5001
 
   zookeeper:
       image: confluentinc/cp-zookeeper
@@ -50,7 +48,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_CREATE_TOPICS: "received_files:1:1,ocr-results-topic:1:1" # "<topic_name>:<partitions>:<replications>"
+      KAFKA_CREATE_TOPICS: "received_files:2:1,ocr-results-topic:1:1" # <topic_name:partitions:replications>
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
