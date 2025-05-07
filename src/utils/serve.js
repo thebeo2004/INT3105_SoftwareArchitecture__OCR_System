@@ -11,6 +11,7 @@ import {
     ocrErrorsTotal,
     pdfCreationErrorsTotal,
     translationErrorsTotal,
+    totalProcessingDurationSeconds
 } from "../middlewares/measurement.js";
 
 export const process = async (filePath) => {
@@ -24,6 +25,8 @@ export const process = async (filePath) => {
         throw new Error(`Failed to read file: ${readError.message}`);
     }
 
+    const totalProcessTimer = totalProcessingDurationSeconds.startTimer();
+
     // --- OCR Step ---
     const ocrEnd = ocrProcessingDurationSeconds.startTimer();
     try {
@@ -34,6 +37,7 @@ export const process = async (filePath) => {
         ocrEnd(); // Still end timer on error
         ocrErrorsTotal.inc({ error_type: e.constructor.name }); // Increment error counter
         console.error("OCR Error:", e);
+        totalProcessTimer(); // Stop total timer on error
         throw new Error(`OCR failed: ${e.message}`); // Re-throw to stop processing this file
     }
 
@@ -45,6 +49,7 @@ export const process = async (filePath) => {
         console.log(viText);
     } catch (e) {
         translateEnd();
+        totalProcessTimer(); // Stop total timer on error
         translationErrorsTotal.inc({ error_type: e.constructor.name });
         console.error("Translation Error:", e);
         // Decide if you want to stop processing or continue with original text
@@ -64,10 +69,12 @@ export const process = async (filePath) => {
     } catch (e) {
         pdfEnd();
         pdfCreationErrorsTotal.inc({ error_type: e.constructor.name });
+        totalProcessTimer(); // Stop total timer on error
         console.error("PDF Creation Error:", e);
         throw new Error(`PDF creation failed: ${e.message}`);
     }
 
+    totalProcessTimer(); // Stop total timer on error
     // If all steps succeed, the overall process for this file is successful
     // (filesProcessedTotal is incremented in the worker after this function returns successfully)
     // Remove the implicit undefined return

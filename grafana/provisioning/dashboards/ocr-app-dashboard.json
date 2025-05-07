@@ -180,6 +180,32 @@
       ],
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
       "fieldConfig": { "defaults": { "unit": "bytes" } }
+    },
+    {
+      "title": "Total Processing Duration (P95 - OCR+Translate+PDF)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": null
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(worker_total_processing_duration_seconds_bucket{job=\"worker\"}[$__rate_interval])) by (le))",
+          "legendFormat": "Total Processing P95"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      }
     }
   ],
   "refresh": "",

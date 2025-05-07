@@ -11,6 +11,7 @@ import { filesProcessedTotal,
         ocrErrorsTotal,         
         pdfCreationErrorsTotal, 
         translationErrorsTotal, 
+        totalProcessingDurationSeconds
  } from "../middlewares/measurement.js";
 
 const WORKER_METRICS_PORT = 5001; // Define a port for worker metrics
@@ -29,6 +30,7 @@ workerRegister.registerMetric(translationDurationSeconds);
 workerRegister.registerMetric(ocrErrorsTotal);
 workerRegister.registerMetric(pdfCreationErrorsTotal);
 workerRegister.registerMetric(translationErrorsTotal);
+workerRegister.registerMetric(totalProcessingDurationSeconds);
 
 workerApp.get('/metrics', async (req, res) => {
     try {

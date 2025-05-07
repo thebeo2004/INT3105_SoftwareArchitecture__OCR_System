@@ -107,3 +107,9 @@ export function createMetricMeasurementMiddleware(httpRequestDurationMicrosecond
         next();
     };
 }
+
+export const totalProcessingDurationSeconds = new client.Histogram({
+    name: 'worker_total_processing_duration_seconds',
+    help: 'Total duration of the OCR, Translation, and PDF creation steps combined, in seconds.',
+    buckets: [0.1, 0.5, 1, 2, 5, 10, 20, 30, 60]
+});
