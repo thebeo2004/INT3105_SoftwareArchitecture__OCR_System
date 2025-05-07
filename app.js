@@ -1,8 +1,9 @@
 import express from "express";
 import client from 'prom-client';
+import { Kafka } from "kafkajs";
 
 // import {process} from "./src/utils/serve.js"
-import { kafka, sending_msg } from "./src/config/kafka.js"
+import { sending_msg } from "./src/config/kafka.js"
 import { upload } from "./src/config/multer.js";
 import { 
     httpRequestDurationMicroseconds, 
@@ -12,6 +13,10 @@ import {
 } from "./src/middlewares/measurement.js";
 
 const app = express();
+const kafka = new Kafka({
+    clientId: 'upload-app-producer',
+    brokers: ['localhost:9092']
+});
 const producer = kafka.producer();
 
 // -- Prometheus Metrics Setup ---
@@ -76,20 +81,20 @@ app.post('/upload', async (req, res) => {
         const errors = [];
 
         for (const file of req.files) {
-            uploadedFileSizeHistogram.observe(file.size);
-            const filePath = file.path;
+            uploadedFileSizeHistogram.observe(file.size); 
+            const filename = file.filename;
 
             try {
                 const messagePayload = {
-                    filePath: filePath
+                    filename: filename
                 };
 
-                await sending_msg(messagePayload, producer); // Đợi gửi xong hoặc xử lý bất đồng bộ nếu cần
-                processedFiles.push(filePath);
+                await sending_msg(messagePayload, producer); 
+                processedFiles.push(filename);
 
             } catch (error) {
-                console.error(`Error processing file ${filePath} or sending to Kafka:`, error);
-                errors.push({ filePath: filePath, error: error.message });
+                console.error(`Error processing file ${filename} or sending to Kafka:`, error); 
+                errors.push({ filename: filename, error: error.message });
             }
         }
 
@@ -102,7 +107,7 @@ app.post('/upload', async (req, res) => {
         } else {
             res.status(202).json({
                 message: `${processedFiles.length} file(s) received and queued for processing.`,
-                filePaths: processedFiles
+                filenames: processedFiles 
             });
         }
 

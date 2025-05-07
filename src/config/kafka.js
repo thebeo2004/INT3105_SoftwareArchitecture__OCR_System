@@ -3,9 +3,11 @@ import { Kafka } from "kafkajs";
 export const RECEIVED_TOPIC = 'received_files';
 export const OUTPUT_TOPIC = 'ocr-results-topic';
 
-export const kafka = new Kafka({
+const kafka_broker = process.env.KAFKA_BROKERS || "kafka:9092"
+
+const kafka = new Kafka({
     clientId: 'upload-app-producer',
-    brokers: ['localhost:9092']
+    brokers: ['kafka:9092']
 });
 
 export const sending_msg =  async (msgPayload, producer) => {

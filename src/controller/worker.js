@@ -16,6 +16,8 @@ import { filesProcessedTotal,
 
 const WORKER_METRICS_PORT = 5001; // Define a port for worker metrics
 
+const UPLOADS_DIR = process.env.UPLOADS_DIR || '/app/uploads';
+export const OUTPUT_DIR = process.env.OUTPUT_DIR || '/app/output';
 
 const workerApp = express();
 const workerRegister = new client.Registry();
@@ -54,7 +56,7 @@ const run = async () => {
 
         workerServer = workerApp.listen(WORKER_METRICS_PORT, () => {
             console.log(`Worker metrics server listening on port ${WORKER_METRICS_PORT}`);
-            console.log(`Worker metrics available at http://localhost:${WORKER_METRICS_PORT}/metrics`);
+            console.log(`Worker metrics available at http://worker:${WORKER_METRICS_PORT}/metrics`);
         });
 
         workerServer.on('error', (err) => {
@@ -73,27 +75,40 @@ const run = async () => {
 
     await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
-            console.log(`Received message from ${topic} partition ${partition}`);
-            let filePath = '';
+            console.log(`Received message from topic ${topic}`);
+            const rawValue = message.value.toString();
+            let payload;
+            try {
+                payload = JSON.parse(rawValue);
+            } catch (e) {
+                console.error("Error parsing Kafka message:", e);
+                // Handle error: maybe move to a dead-letter queue or log extensively
+                return; 
+            }
+
+            const filename = payload.filename; // Get filename from payload
+
+            if (!filename) {
+                console.error("Message payload does not contain a filename.");
+                return;
+            }
+
+            // Construct the full path inside the container
+            const inputPath = path.join(UPLOADS_DIR, filename);
+            console.log(`Processing file: ${inputPath}`);
 
             try {
-                const payload = JSON.parse(message.value.toString());
-                filePath = payload.filePath;
-
-                if (!filePath) {
-                    throw new Error(`File path missing in message payload.`);
-                }
-
-                console.log(`Processing file via serve.js: ${filePath}`);
-
-                const resultPdfPath = await processFile(filePath);
-
-                filesProcessedTotal.inc();
-                ocrPagesProcessedTotal.inc();
-                console.log(`Successfully processed ${path.basename(filePath)}. Result PDF: ${resultPdfPath}`);
+                // Pass the container-internal path to the process function
+                const outputFilename = await processFile(inputPath);
+                
+                filesProcessedTotal.inc(); // Increment counter on successful processing
+                console.log(`Successfully processed ${filename}, output: ${outputFilename}`);
+                
+                // Optionally send a message about the result (e.g., to OUTPUT_TOPIC)
+                // await sendResultToKafka(producer, { originalFilename: filename, pdfPath: path.join(OUTPUT_DIR, outputFilename) });
 
             } catch (error) {
-                console.error(`Worker failed to process message for file ${filePath || 'unknown'}:`, error.message);
+                console.error(`Error processing file ${inputPath}:`, error);
             }
         },
     });
