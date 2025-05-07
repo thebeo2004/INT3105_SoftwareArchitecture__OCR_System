@@ -18,6 +18,7 @@ services:
       - KAFKA_BROKERS=broker:29092
       - UPLOADS_DIR=/app/uploads
       - OUTPUT_DIR=/app/output
+      - REDIS_URL=redis://redis:6379
 
   zookeeper:
       image: confluentinc/cp-zookeeper
@@ -115,17 +116,19 @@ services:
     depends_on:
       - prometheus
     environment:
-      # Optional: Pre-configure Prometheus datasource (adjust URL if needed)
-      # GF_DATASOURCES_0_NAME: Prometheus
-      # GF_DATASOURCES_0_TYPE: prometheus
-      # GF_DATASOURCES_0_URL: http://prometheus:9090
-      # GF_DATASOURCES_0_ACCESS: proxy
-      # GF_DATASOURCES_0_IS_DEFAULT: true
-      # GF_SECURITY_ADMIN_USER: admin # Default user
-      # GF_SECURITY_ADMIN_PASSWORD: admin # Default password (CHANGE THIS IN PRODUCTION)
       - GF_AUTH_DISABLE_LOGIN_FORM=true
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
 
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data # Persist Redis data
+
 volumes:
   grafana-storage: {} # Define the volume for Grafana data
+  redis-data: {} # Define the volume for Redis data
