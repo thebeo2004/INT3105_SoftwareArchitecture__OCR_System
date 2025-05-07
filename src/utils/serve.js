@@ -1,7 +1,7 @@
 import { image2text } from "./ocr.js";
 import { createPDF } from "./pdf.js";
 import { translate } from "./translate.js";
-import fs from 'fs/promises';
+import crypto from 'crypto'
 
 // Import the necessary metrics
 import {
@@ -11,64 +11,92 @@ import {
     ocrErrorsTotal,
     pdfCreationErrorsTotal,
     translationErrorsTotal,
+    cacheHitTotal,
+    cacheMissTotal,
+    totalProcessingDurationSeconds
 } from "../middlewares/measurement.js";
 
-export const process = async (filePath) => {
-    let text, viText, pdfFile;
-    let buffer;
+export const process = async (fileBuffer, redisClient) => {
+    
+    const fileHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+    const processedTextCacheKey = `ocrtrans:${fileHash}`;
+    const PROCESSED_TEXT_CACHE_TTL = 60; // Time to Live = 1 minutes
+
+    let ocrText;
+    let translatedText;
+    let outputPdfFilename;
+
+    // Start timer for total processing time
+    const totalProcessTimer = totalProcessingDurationSeconds.startTimer();
 
     try {
-        buffer = await fs.readFile(filePath); 
-    } catch (readError) {
-        console.error(`Error reading file ${filePath}:`, readError);
-        throw new Error(`Failed to read file: ${readError.message}`);
-    }
+        // Check if there are any content with the same key as processedTextCacheKey in Redis
+        const cachedProcessedText = await redisClient.get(processedTextCacheKey);
 
-    // --- OCR Step ---
-    const ocrEnd = ocrProcessingDurationSeconds.startTimer();
-    try {
-        text = await image2text(buffer);
-        ocrEnd(); // End timer on success
-        console.log(text);
-    } catch (e) {
-        ocrEnd(); // Still end timer on error
-        ocrErrorsTotal.inc({ error_type: e.constructor.name }); // Increment error counter
-        console.error("OCR Error:", e);
-        throw new Error(`OCR failed: ${e.message}`); // Re-throw to stop processing this file
-    }
+        if (cachedProcessedText) {
+            translatedText = cachedProcessedText;
+            cacheHitTotal.inc();
+            console.log(`[CACHE SERVE] OCR+TRANSLATED Text Cache HIT for hash: ${fileHash}`);
+        } else {
+            cacheMissTotal.inc();
+            console.log(`[CACHE SERVE] OCR+TRANSLATED Text Cache MISS for hash: ${fileHash}. Starting OCR and Translation.`);
 
-    // --- Translation Step ---
-    const translateEnd = translationDurationSeconds.startTimer();
-    try {
-        viText = await translate(text);
-        translateEnd();
-        console.log(viText);
-    } catch (e) {
-        translateEnd();
-        translationErrorsTotal.inc({ error_type: e.constructor.name });
-        console.error("Translation Error:", e);
-        // Decide if you want to stop processing or continue with original text
-        // Option 1: Stop processing
-        throw new Error(`Translation failed: ${e.message}`);
-        // Option 2: Continue with original text (remove throw, maybe assign text to viText)
-        // viText = text; 
-    }
+            const ocrTimer = ocrProcessingDurationSeconds.startTimer();
+            try {
+                ocrText = await image2text(fileBuffer);
+                ocrTimer();
+                console.log(`[SERVE] OCR Text (hash: ${fileHash}):`, ocrText ? ocrText.substring(0, 100) + "..." : "EMPTY");
+            } catch (e) {
+                ocrTimer();
+                ocrErrorsTotal.inc({ error_type: e.constructor.name });
+                console.error(`[SERVE] OCR Error (hash: ${fileHash}):`, e);
+                totalProcessTimer(); // Stop total timer on error
+                throw new Error(`OCR failed: ${e.message}`);
+            }
 
-    // --- PDF Creation Step ---
-    const pdfEnd = pdfCreationDurationSeconds.startTimer();
-    try {
-        pdfFile = await createPDF(viText); // Use translated text and await the promise
-        pdfEnd();
-        console.log("PDF created: " + pdfFile);
-        return pdfFile; // Return the PDF file path on success
-    } catch (e) {
-        pdfEnd();
-        pdfCreationErrorsTotal.inc({ error_type: e.constructor.name });
-        console.error("PDF Creation Error:", e);
-        throw new Error(`PDF creation failed: ${e.message}`);
-    }
+            if (!ocrText || ocrText.trim() === "") {
+                console.warn(`[SERVE] Skipping translation for hash ${fileHash} due to empty OCR text.`);
+                translatedText = "";
+            } else {
+                const translateTimer = translationDurationSeconds.startTimer();
+                try {
+                    translatedText = await translate(ocrText);
+                    translateTimer();
+                } catch (e) {
+                    translateTimer();
+                    translationErrorsTotal.inc({ error_type: e.constructor.name });
+                    console.error(`[SERVE] Translation Error (hash: ${fileHash}):`, e);
+                    totalProcessTimer(); // Stop total timer on error
+                    throw new Error(`Translation failed: ${e.message}`);
+                }
+            }
+            console.log(`[SERVE] Translated Text (hash: ${fileHash}):`, translatedText ? translatedText.substring(0, 100) + "..." : "EMPTY");
 
-    // If all steps succeed, the overall process for this file is successful
-    // (filesProcessedTotal is incremented in the worker after this function returns successfully)
-    // Remove the implicit undefined return
+            if (translatedText && translatedText.trim() !== "") {
+                await redisClient.set(processedTextCacheKey, translatedText, { EX: PROCESSED_TEXT_CACHE_TTL });
+                console.log(`[CACHE SERVE] OCR+TRANSLATED Text stored in cache for hash: ${fileHash}`);
+            } else {
+                console.warn(`[SERVE] Translated text for hash ${fileHash} is empty. Not caching.`);
+            }
+        }
+
+        const pdfTimer = pdfCreationDurationSeconds.startTimer();
+        try {
+            outputPdfFilename = await createPDF(translatedText || "No content to display.");
+            pdfTimer();
+        } catch (e) {
+            pdfTimer();
+            pdfCreationErrorsTotal.inc({ error_type: e.constructor.name });
+            console.error(`[SERVE] PDF Creation Error (hash: ${fileHash}):`, e);
+            totalProcessTimer(); // Stop total timer on error
+            throw new Error(`PDF creation failed: ${e.message}`);
+        }
+
+        totalProcessTimer(); // Stop total timer after successful completion of all steps
+        return outputPdfFilename;
+
+    } catch (error) {
+        console.error(`[SERVE] Error in processing pipeline for hash ${fileHash}:`, error.message);
+        throw error;
+    }
 };

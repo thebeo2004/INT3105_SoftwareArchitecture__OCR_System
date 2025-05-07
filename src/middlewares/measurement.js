@@ -1,6 +1,5 @@
 import client from 'prom-client';
 
-
 // Histogram for HTTP request duration
 export const httpRequestDurationMicroseconds = new client.Histogram({
     name: 'http_request_duration_seconds',
@@ -108,12 +107,18 @@ export function createMetricMeasurementMiddleware(httpRequestDurationMicrosecond
     };
 }
 
-export const cacheHitTotal = new Counter({
-    name: 'worker_cache_hit_total',
-    help: 'Total number of cache hits.',
-})
+export const cacheHitTotal = new client.Counter({
+    name: 'worker_cache_hit_total', 
+    help: 'Total number of cache hits for the processed OCR+Translated text.',
+});
 
-export const cacheMissTotal = new Counter({
+export const cacheMissTotal = new client.Counter({
     name: 'worker_cache_miss_total',
-    help: 'Total number of cache missess',
-})
+    help: 'Total number of cache misses for the processed OCR+Translated text.',
+});
+
+export const totalProcessingDurationSeconds = new client.Histogram({
+    name: 'worker_total_processing_duration_seconds',
+    help: 'Total duration of the OCR, Translation, and PDF creation steps combined, in seconds.',
+    buckets: [0.1, 0.5, 1, 2, 5, 10, 20, 30, 60]
+});
