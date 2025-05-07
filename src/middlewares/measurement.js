@@ -107,3 +107,13 @@ export function createMetricMeasurementMiddleware(httpRequestDurationMicrosecond
         next();
     };
 }
+
+export const cacheHitTotal = new Counter({
+    name: 'worker_cache_hit_total',
+    help: 'Total number of cache hits.',
+})
+
+export const cacheMissTotal = new Counter({
+    name: 'worker_cache_miss_total',
+    help: 'Total number of cache missess',
+})
