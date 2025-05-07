@@ -61,9 +61,9 @@ Dự án được phát triển qua nhiều giai đoạn, với mỗi giai đo�
 **Giám sát và So sánh Hiệu năng:**
 Một khía cạnh quan trọng trong quá trình phát triển là việc triển khai cơ chế giám sát (sử dụng Prometheus và Grafana) cho cả ba phiên bản kiến trúc. Điều này cho phép nhóm thực hiện các kịch bản kiểm thử tải (load testing) một cách nhất quán và thu thập dữ liệu hiệu năng chi tiết. Từ đó, nhóm có thể đưa ra những so sánh tường minh về ưu nhược điểm của từng kiến trúc, đánh giá hiệu quả của các giải pháp cải tiến và đưa ra quyết định dựa trên dữ liệu thực tế.
 
-## 3. Kiến trúc Triển Khai Hiện Tại (Message Queue, Cache)
+## 3. Kiến trúc Triển Khai Hiện Tại (Message Queue, Cache và Multiple Workers)
 
-Phần dưới đây mô tả chi tiết kiến trúc hệ thống đã được hoàn thiện và tối ưu nhất, tương ứng với sự kết hợp của các ý tưởng từ nhánh `message_queue` và `cache`. Sơ đồ và luồng hoạt động thể hiện cách các thành phần tương tác trong một môi trường được quản lý bởi Docker Compose, tận dụng Kafka cho xử lý bất đồng bộ và Redis cho caching.
+Phần dưới đây mô tả chi tiết kiến trúc hệ thống đã được hoàn thiện và tối ưu nhất, tương ứng với sự kết hợp của các ý tưởng từ nhánh `message_queue` và `cache` lẫn `Multiple Workers`. Sơ đồ và luồng hoạt động thể hiện cách các thành phần tương tác trong một môi trường được quản lý bởi Docker Compose, tận dụng Kafka cho xử lý bất đồng bộ và Redis cho caching.
 
 ![Sơ đồ kiến trúc hệ thống](system_architecture.jpg "Sơ đồ Kiến trúc Hệ thống")
 
