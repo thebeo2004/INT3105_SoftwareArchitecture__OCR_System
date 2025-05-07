@@ -64,6 +64,7 @@ export const process = async (filePath) => {
     try {
         pdfFile = await createPDF(viText); // Use translated text and await the promise
         pdfEnd();
+        totalProcessTimer(); 
         console.log("PDF created: " + pdfFile);
         return pdfFile; // Return the PDF file path on success
     } catch (e) {
@@ -74,7 +75,7 @@ export const process = async (filePath) => {
         throw new Error(`PDF creation failed: ${e.message}`);
     }
 
-    totalProcessTimer(); // Stop total timer on error
+    // Stop total timer on error
     // If all steps succeed, the overall process for this file is successful
     // (filesProcessedTotal is incremented in the worker after this function returns successfully)
     // Remove the implicit undefined return
