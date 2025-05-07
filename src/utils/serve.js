@@ -1,6 +1,7 @@
 import { image2text } from "./ocr.js";
 import { createPDF } from "./pdf.js";
 import { translate } from "./translate.js";
+import fs from 'fs';
 import crypto from 'crypto'
 
 // Import the necessary metrics
@@ -16,7 +17,15 @@ import {
     totalProcessingDurationSeconds
 } from "../middlewares/measurement.js";
 
-export const process = async (fileBuffer, redisClient) => {
+export const process = async (inputPath, redisClient) => {
+    
+    let fileBuffer;
+    
+    try {
+        fileBuffer = fs.readFileSync(inputPath);
+    } catch (error) {
+        console.error(`Something wrong when read file from ${inputPath}`, error);
+    }
     
     const fileHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
     const processedTextCacheKey = `ocrtrans:${fileHash}`;
