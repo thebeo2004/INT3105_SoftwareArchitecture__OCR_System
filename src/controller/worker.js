@@ -3,6 +3,8 @@ import path from 'path';
 import express from 'express';
 import client from "prom-client";
 import { process as processFile } from "../utils/serve.js";
+import { createClient as createRedisClient } from "redis";
+
 import { filesProcessedTotal, 
         ocrPagesProcessedTotal,
         ocrProcessingDurationSeconds,
@@ -17,6 +19,7 @@ const WORKER_METRICS_PORT = 5001; // Define a port for worker metrics
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || '/app/uploads';
 export const OUTPUT_DIR = process.env.OUTPUT_DIR || '/app/output';
+const REDIS_URL = process.env.REDIS_URL || 'redis://redis:6379';
 
 const workerApp = express();
 const workerRegister = new client.Registry();
@@ -43,12 +46,24 @@ workerApp.get('/metrics', async (req, res) => {
 });
 
 let workerServer;
+let redisClient;
 
 const consumer = kafka.consumer({ 
     groupId: 'ocr-worker-group'
 });
 
 const run = async () => {
+
+    // Initialize Redis Client
+    try {
+        redisClient = createRedisClient({ url: REDIS_URL });
+        redisClient.on('error', (err) => console.error('[REDIS] Redis Client Error', err));
+        await redisClient.connect();
+        console.log('[REDIS] Connected to Redis successfully');
+    } catch (err) {
+        console.error('[REDIS] Could not connect to Redis:', err);
+        process.exit(1);
+    }
 
     try {
 
@@ -80,7 +95,6 @@ const run = async () => {
                 payload = JSON.parse(rawValue);
             } catch (e) {
                 console.error("Error parsing Kafka message:", e);
-                // Handle error: maybe move to a dead-letter queue or log extensively
                 return; 
             }
 
@@ -91,13 +105,12 @@ const run = async () => {
                 return;
             }
 
-            // Construct the full path inside the container
             const inputPath = path.join(UPLOADS_DIR, filename);
             console.log(`Processing file: ${inputPath}`);
 
             try {
                 // Pass the container-internal path to the process function
-                const outputFilename = await processFile(inputPath);
+                const outputFilename = await processFile(inputPath, redisClient);
                 
                 filesProcessedTotal.inc(); // Increment counter on successful processing
                 console.log(`Successfully processed ${filename}, output: ${outputFilename}`);
