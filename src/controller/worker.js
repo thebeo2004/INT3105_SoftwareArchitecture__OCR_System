@@ -55,7 +55,13 @@ let workerServer;
 let redisClient;
 
 const consumer = kafka.consumer({ 
-    groupId: 'ocr-worker-group'
+    groupId: 'ocr-worker-group',
+    sessionTimeout: 30000, // Set session timeout to 30 seconds
+    heartbeatInterval: 3000, // Set heartbeat interval to 3 seconds
+    retry: {
+        retries: 5, // Retry up to 5 times on failure
+        initialRetryTime: 300, // Initial retry time in ms
+    }
 });
 
 const run = async () => {
