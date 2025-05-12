@@ -48,8 +48,8 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_CREATE_TOPICS: "received_files:2:1,ocr-results-topic:2:1" # Tăng số lượng partition cho received_files lên 3
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 3000 # Tăng thời gian rebalance lên 3000ms
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 3000
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
@@ -104,7 +104,7 @@ services:
       - '9090:9090'
 
   grafana:
-    image: grafana/grafana-oss:latest # Use the open-source version
+    image: grafana/grafana-oss:latest
     container_name: grafana
     restart: always
     ports:
@@ -127,6 +127,26 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data # Persist Redis data
+
+  init-kafka:
+    image: confluentinc/cp-kafka:${CONFLUENT_PLATFORM_VERSION:-7.3.0} # Sử dụng một phiên bản cp-kafka phù hợp
+    depends_on:
+      broker:
+        condition: service_healthy
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: |
+      "
+      echo 'Waiting for Kafka to be ready...'
+      # Chờ Kafka sẵn sàng bằng cách kiểm tra kết nối
+      cub kafka-ready -b broker:29092 1 20
+      
+      echo 'Creating Kafka topics...'
+      kafka-topics --create --if-not-exists --topic received_files --partitions 2 --replication-factor 1 --bootstrap-server broker:29092
+      kafka-topics --create --if-not-exists --topic ocr-results-topic --partitions 2 --replication-factor 1 --bootstrap-server broker:29092
+      
+      echo 'Kafka topics created.'
+      "
+    restart: on-failure
 
 volumes:
   grafana-storage: {} # Define the volume for Grafana data

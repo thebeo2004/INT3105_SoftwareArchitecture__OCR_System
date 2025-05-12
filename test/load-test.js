@@ -51,39 +51,39 @@ function getContentType(filename) {
 export const options = {
 
     // Kịch bản 1: Kiểm thử Cơ bản (Baseline Test)
-    scenarios: {
-      baseline: {
-        executor: 'constant-arrival-rate', 
-        // 1 request per second
-        rate: 1, 
-        timeUnit: '1s',
-        // Duration of scenario
-        duration: '5m', 
-        // There are always 5 VUs and this number might reach 10
-        preAllocatedVUs: 5, 
-        maxVUs: 10, 
-        exec: 'uploadFile', 
-      },
-    },
-
-    // // Kịch bản 2: Kiểm thử Tải Tăng dần (Ramp-up Load Test)
     // scenarios: {
-    //   ramp_up: {
-    //     executor: 'ramping-vus', 
-    //     startVUs: 0,
-    //     stages: [
-    //       { duration: '2m', target: 10 }, 
-    //       { duration: '3m', target: 10 }, 
-    //       { duration: '2m', target: 30 }, 
-    //       { duration: '3m', target: 30 }, 
-    //       { duration: '2m', target: 50 }, 
-    //       { duration: '5m', target: 50 }, 
-    //       { duration: '2m', target: 0 },  
-    //     ],
-    //     gracefulRampDown: '30s', 
-    //     exec: 'uploadFile',
+    //   baseline: {
+    //     executor: 'constant-arrival-rate', 
+    //     // 1 request per second
+    //     rate: 1, 
+    //     timeUnit: '1s',
+    //     // Duration of scenario
+    //     duration: '5m', 
+    //     // There are always 5 VUs and this number might reach 10
+    //     preAllocatedVUs: 5, 
+    //     maxVUs: 10, 
+    //     exec: 'uploadFile', 
     //   },
     // },
+
+    // // Kịch bản 2: Kiểm thử Tải Tăng dần (Ramp-up Load Test)
+    scenarios: {
+      ramp_up: {
+        executor: 'ramping-vus', 
+        startVUs: 0,
+        stages: [
+          { duration: '2m', target: 10 }, 
+          { duration: '3m', target: 10 }, 
+          { duration: '2m', target: 30 }, 
+          { duration: '3m', target: 30 }, 
+          { duration: '2m', target: 50 }, 
+          { duration: '5m', target: 50 }, 
+          { duration: '2m', target: 0 },  
+        ],
+        gracefulRampDown: '30s', 
+        exec: 'uploadFile',
+      },
+    },
 
     // // Kịch bản 3: Kiểm thử Sức chịu đựng (Stress Test)
     // scenarios: {
@@ -124,7 +124,8 @@ export const options = {
 export function uploadFile () {
     const url = `${BASE_URL}${ENDPOINT}`;
 
-    const randomFile = randomItem(imageFiles);
+    const seed = 18112004;
+    const randomFile = randomItem(imageFiles, seed);
 
     const contentType = getContentType(randomFile.name);
 
