@@ -1,5 +1,23 @@
 # Dự án Xử lý Ảnh OCR và Dịch Thuật (INT3105 - Software Architecture Project)
 
+## Mục lục
+1. [Mô tả Dự án](#1-mô-tả-dự-án)
+2. [Các Nhiệm Vụ Đã Hoàn Thành](#2-các-nhiệm-vụ-đã-hoàn-thành)
+   - [2.1. Quá Trình Phát Triển Kiến Trúc và Các Phiên Bản](#21-quá-trình-phát-triển-kiến-trúc-và-các-phiên-bản)
+3. [Kiến trúc Triển Khai Hiện Tại (Message Queue, Cache và Multiple Workers)](#3-kiến-trúc-triển-khai-hiện-tại-message-queue-cache-và-multiple-workers)
+4. [Cách Sử Dụng](#4-cách-sử-dụng)
+   - [4.1. Yêu Cầu Hệ Thống](#41-yêu-cầu-hệ-thống)
+   - [4.2. Khởi Chạy Hệ Thống](#42-khởi-chạy-hệ-thống)
+   - [4.3. Sử Dụng Chức Năng Upload](#43-sử-dụng-chức-năng-upload)
+   - [4.4. Truy Cập Các Công Cụ Giám Sát](#44-truy-cập-các-công-cụ-giám-sát)
+   - [4.5. Chạy Kiểm Thử Tải (k6)](#45-chạy-kiểm-thử-tải-k6)
+   - [4.6. Dừng Hệ Thống](#46-dừng-hệ-thống)
+5. [So sánh hiệu năng](#5-so-sánh-hiệu-năng)
+   - [5.1 Mô tả kịch bản kiểm thử](#51-mô-tả-kịch-bản-kiểm-thử)
+   - [5.2 Mô tả kết quả](#52-mô-tả-kết-quả)
+   - [5.3 Kết luận](#53-kết-luận)
+6. [Thành Viên Nhóm](#6-thành-viên-nhóm)
+
 ## 1. Mô tả Dự án
 
 Dự án hướng tới xây dựng một hệ thống có khả năng tiếp nhận file ảnh, thực hiện Nhận dạng Ký tự Quang học (OCR) để trích xuất văn bản, dịch văn bản đó sang tiếng Việt, và cuối cùng tạo ra một file PDF chứa văn bản đã dịch. Hệ thống được thiết kế với kiến trúc microservices, sử dụng Kafka để xử lý bất đồng bộ và Redis cho việc caching, cùng với bộ công cụ giám sát Prometheus và Grafana.
@@ -65,7 +83,7 @@ Dự án được phát triển qua nhiều giai đoạn, với mỗi giai đo�
 *   **Nhánh `filter_scaling` (Tối ưu hóa với số lượng Workers chạy cùng lúc):**
     * Thông qua việc triển khai *containerizing*, cho phép nhóm tạo tiền đề linh hoạt trong số lượng *Workers* có thể chạy cùng lúc thay vì cố định cứng.
 
-* **Nhánh Web (Triển khai với HTML và CSS):**
+* **Nhánh `web` (Triển khai với HTML và CSS):**
     * Nhánh Web là phiên bản UI của Kiến trúc cơ bản, cho việc tải nhiều files và nhận về các files đó đã qua xử lý. Việc trực quan hóa giúp dễ dàng trong việc sử dụng. Song hạn chế là chưa triển khai UI với phiên bản kiến trúc tốt nhất là `filter_scaling`
 
 **Giám sát và So sánh Hiệu năng:**
