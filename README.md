@@ -35,8 +35,11 @@ Dự án hướng tới xây dựng một hệ thống có khả năng tiếp nh
 *   **Containerization với Docker:**
     *   Docker hóa các thành phần của hệ thống (Kafka, Zookeeper, Control Center, Redis, Prometheus, Grafana, và ứng dụng Node.js `worker`).
     *   Sử dụng Docker Compose (`docker-compose.yml`) để quản lý và khởi chạy toàn bộ hệ thống một cách dễ dàng.
-*   **Tối ưu hóa (Đang thực hiện):**
-    *   Phân tích và tìm cách tối ưu số lượng "filter" (worker instances) để phù hợp với hạ tầng phần cứng.
+*   **Tối ưu hóa:**
+    *   Tối ưu số lượng "filter" (worker instances) để phù hợp với hạ tầng phần cứng. Ở đây, thông qua việc *containering worker*, nhóm đã tạo điều kiện ở ứng với các hạ tầng phần cứng khác nhau, thì có thể triển khai khác nhau thông qua cú pháp Docker Compose, thay vì cố định cứng (**n** tùy chọn, như ở dưới):
+        ```bash
+        docker-compose up --scale worker=n --build
+        ```
 
 ## 2.1. Quá Trình Phát Triển Kiến Trúc và Các Phiên Bản
 
@@ -58,8 +61,14 @@ Dự án được phát triển qua nhiều giai đoạn, với mỗi giai đo�
     *   Trước khi thực hiện các tác vụ OCR và dịch thuật tốn kém, `Worker Service` sẽ kiểm tra xem nội dung file (dựa trên mã hash của file) đã từng được xử lý và lưu trữ trong Redis hay chưa.
     *   Nếu tìm thấy trong cache (cache hit), kết quả sẽ được sử dụng lại ngay lập tức, bỏ qua các bước xử lý nặng. Điều này giúp giảm thiểu đáng kể thời gian xử lý cho các file trùng lặp và giảm tải cho hệ thống.
 
+*   **Nhánh `filter_scaling` (Tối ưu hóa với số lượng Workers chạy cùng lúc):**
+    * Thông qua việc triển khai *containerizing*, cho phép nhóm tạo tiền đề linh hoạt trong số lượng *Workers* có thể chạy cùng lúc thay vì cố định cứng.
+
+* **Nhánh Web (Triển khai với HTML và CSS):**
+    * Nhánh Web là phiên bản UI của Kiến trúc cơ bản, cho việc tải nhiều files và nhận về các files đó đã qua xử lý. Việc trực quan hóa giúp dễ dàng trong việc sử dụng. Song hạn chế là chưa triển khai UI với phiên bản kiến trúc tốt nhất là `filter_scaling`
+
 **Giám sát và So sánh Hiệu năng:**
-Một khía cạnh quan trọng trong quá trình phát triển là việc triển khai cơ chế giám sát (sử dụng Prometheus và Grafana) cho cả ba phiên bản kiến trúc. Điều này cho phép nhóm thực hiện các kịch bản kiểm thử tải (load testing) một cách nhất quán và thu thập dữ liệu hiệu năng chi tiết. Từ đó, nhóm có thể đưa ra những so sánh tường minh về ưu nhược điểm của từng kiến trúc, đánh giá hiệu quả của các giải pháp cải tiến và đưa ra quyết định dựa trên dữ liệu thực tế.
+Một khía cạnh quan trọng trong quá trình phát triển là việc triển khai cơ chế giám sát (sử dụng Prometheus và Grafana) cho cả 4 phiên bản kiến trúc. Điều này cho phép nhóm thực hiện các kịch bản kiểm thử tải (load testing) một cách nhất quán và thu thập dữ liệu hiệu năng chi tiết. Từ đó, nhóm có thể đưa ra những so sánh tường minh về ưu nhược điểm của từng kiến trúc, đánh giá hiệu quả của các giải pháp cải tiến và đưa ra quyết định dựa trên dữ liệu thực tế.
 
 ## 3. Kiến trúc Triển Khai Hiện Tại (Message Queue, Cache và Multiple Workers)
 
@@ -101,8 +110,9 @@ Phần dưới đây mô tả chi tiết kiến trúc hệ thống đã được
     ```
 
 1.  **Xây dựng và khởi chạy các container Docker:**
+    * Lưu ý: Số lượng thiết lập *worker* ở dưới chỉ phù với kiến trúc máy tính đang thực nghiệm. Tùy cấu hình khác nhau, có những điều chỉnh khác nhau.
     ```bash
-    docker-compose up --build 
+    docker-compose up --scale worker=2 --build 
     ```
     Lệnh này sẽ xây dựng image cho `worker` và khởi chạy tất cả các service.
 
@@ -150,14 +160,14 @@ Phần dưới đây mô tả chi tiết kiến trúc hệ thống đã được
     ```bash
     k6 run test/load-test.js
     ```
-    Kết quả kiểm thử sẽ được hiển thị trên terminal. Bạn cũng có thể theo dõi các dashboard Grafana trong quá trình chạy tải để xem hệ thống phản ứng như thế nào.
+    Kết quả kiểm thử sẽ được hiển thị trên terminal. Hoặc có thể theo dõi các dashboard Grafana trong quá trình chạy tải để xem hệ thống phản ứng như thế nào.
 
 ### 4.6. Dừng Hệ Thống
 
 ```bash
 docker-compose down
 ```
-Nếu bạn muốn xóa cả volumes (dữ liệu Kafka, Grafana, v.v.):
+Lựa chọn xóa cả volumes (dữ liệu Kafka, Grafana, v.v.):
 ```bash
 docker-compose down -v
 ```
