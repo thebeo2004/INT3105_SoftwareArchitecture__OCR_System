@@ -77,7 +77,7 @@
         "datasource": { "type": "prometheus", "uid": null },
         "targets": [
             {
-                "expr": "rate(files_processed_total{job=\"worker\"}[$__rate_interval])",
+                "expr": "sum(rate(files_processed_total{job=\"worker\"}[$__rate_interval]))",
                 "legendFormat": "Files Processed / sec"
             }
         ],
@@ -190,11 +190,11 @@
       },
       "targets": [
         {
-          "expr": "rate(worker_cache_hit_total{job=\"worker\"}[$__rate_interval])",
+          "expr": "sum(rate(worker_cache_hit_total{job=\"worker\"}[$__rate_interval]))",
           "legendFormat": "Cache Hit Rate"
         },
         {
-          "expr": "rate(worker_cache_miss_total{job=\"worker\"}[$__rate_interval])",
+          "expr": "sum(rate(worker_cache_miss_total{job=\"worker\"}[$__rate_interval]))",
           "legendFormat": "Cache Miss Rate"
         }
       ],
