@@ -9,6 +9,7 @@ Dự án hướng tới xây dựng một hệ thống có khả năng tiếp nh
 *   **Tiếp nhận File:**
     *   Xây dựng API endpoint (`/upload`) để người dùng có thể tải lên một hoặc nhiều file ảnh.
     *   Lưu trữ file tạm thời trên server.
+*   **Xây dựng UI:** Xây dựng Web UI cho phép tải lên nhiều files khác nhau và nhận về files sau khi xử lý của chúng một cách trực quan, dễ nhìn với *HTML* và *CSS*.
 *   **Pipeline Xử lý Bất đồng bộ với Kafka:**
     *   Triển khai Kafka làm message broker.
     *   Service `app` (producer) gửi thông tin file cần xử lý vào một topic Kafka.
@@ -156,7 +157,8 @@ Phần dưới đây mô tả chi tiết kiến trúc hệ thống đã được
 
 1.  Đảm bảo hệ thống đang chạy (các service Docker Compose đã `up` và cả `NodeJS` server).
 2.  Mở terminal mới, điều hướng đến thư mục gốc của dự án.
-3.  Chạy lệnh:
+3. Lựa chọn kịch bản kiểm thử ở trong `load-test.js`, có 4 kịch bản, tương ứng với 4 mục đích khác nhau.
+4.  Chạy lệnh:
     ```bash
     k6 run test/load-test.js
     ```
@@ -172,7 +174,20 @@ Lựa chọn xóa cả volumes (dữ liệu Kafka, Grafana, v.v.):
 docker-compose down -v
 ```
 
-## 5. Thành Viên Nhóm
+## 5. So sánh hiệu năng
+
+### 5.1 Mô tả kịch bản kiểm thử
+
+| Kịch bản                                         | Loại kiểm thử                          | Mô tả                                                                                                                                                                                             | Mục đích                                                                                                                               |
+| :----------------------------------------------- | :-------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
+| 1                                                | Kiểm thử cơ bản                        | - Request per second: 1<br>- Duration: 5m<br>- preAllocatedVUs: 5<br>- maxVUs: 10                                                                                                                  | Thiết lập một đường cơ sở về hiệu suất của hệ thống dưới một tải trọng nhẹ và ổn định.                                                |
+| 2                                                | Kiểm thử tải tăng dần (Ramp-up Load Test) | - StartVUs: 0<br>- Các giai đoạn tăng dần bao gồm:<br>  + { duration: \'2m\', target: 10 },<br>  + { duration: \'3m\', target: 10 },<br>  + { duration: \'2m\', target: 30 },<br>  + { duration: \'3m\', target: 30 },<br>  + { duration: \'2m\', target: 50 },<br>  + { duration: \'5m\', target: 50 },<br>  + { duration: \'2m\', target: 0 },<br>→ Total duration: 19m<br>→ MaxVUs: 50 (5m) | Xem hệ thống phản ứng như thế nào khi tải trọng tăng dần. Từ đó, giúp xác định điểm nghẽn cổ chai và giới hạn hiệu suất.                |
+| 3                                                | Kiểm thử sức chịu đựng (Stress Test)     | - startVUs: 0<br>- Các giai đoạn:<br>  + { duration: \'1m\', target: 100 }, <br>  + { duration: \'5m\', target: 100 },<br>  + { duration: \'1m\', target: 0 },<br>→ Total duration: 7m<br>→ MaxVUs: 100 (5m)    | Xác định khả năng chịu đựng của hệ thống khi hoạt động ở hoặc vượt quá giới hạn tải trọng dự kiến. Từ đó, giúp tìm ra điểm gãy hệ thống. |
+| 4<br>**CHẠY LÂU, CHƯA THỬ NGHIỆM** | Kiểm thử ngâm (Soak Test)              | - VUs: 30<br>- Duration: 1h                                                                                                                                                                                        | Đánh giá sự ổn định và hiệu suất của hệ thống khi chịu tải trọng trong thời gian dài.                                                  |
+
+### 5.2 Mô tả kết quả
+
+## 6. Thành Viên Nhóm
 
 *   [Nguyễn Hữu Thế - 22028155](https://github.com/thebeo2004)
 *   [Vũ Thị Minh Thư - 22028116](https://github.com/VuThiMinhThu2004)
